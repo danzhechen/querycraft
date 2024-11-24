@@ -1,0 +1,6 @@
+[submodule "test_databases/fruitmart"]
+	path = test_databases/fruitmart
+	url = https://github.com/mikeizbicki/sql_quiz.git
+[submodule "test_databases/pagila"]
+	path = test_databases/pagila
+	url = https://github.com/devrimgunduz/pagila.git
