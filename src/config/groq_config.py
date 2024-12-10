@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 from dotenv import load_dotenv
 import groq
 import re
@@ -7,7 +8,16 @@ from src.utils.schema_loader import SchemaLoader
 from typing import Optional
 from groq import InternalServerError
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class GroqConfig:
+    SCHEMA_MAPPING = {
+        "pagila-hw": "pagila",
+        "pagila-hw2": "pagila",
+        "pagila-hw3": "pagila"
+    }
+    
     def __init__(self, schema_name: str, max_retries: int = 3, retry_delay: float = 1.0):
         """Initialize GroqConfig with a specific schema
         
@@ -32,10 +42,42 @@ class GroqConfig:
                 f"Available schemas: {', '.join(available_schemas)}"
             )
         
-        self.schema_loader = SchemaLoader(schema_name=schema_name)
+        base_schema_name = self.SCHEMA_MAPPING.get(schema_name, schema_name)
+        self.schema_name = schema_name
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        self.schema_loader = SchemaLoader(schema_name=base_schema_name)
 
+    @staticmethod
+    def _is_valid_sql(response: str) -> bool:
+        """Check if response is pure SQL without markdown or explanations  
+        
+        >>> from src.config.groq_config import GroqConfig
+        >>> GroqConfig._is_valid_sql("SELECT * FROM users;")
+        True
+        >>> GroqConfig._is_valid_sql("DELETE FROM users WHERE id = 1;")
+        True
+        >>> GroqConfig._is_valid_sql("WITH cte AS (SELECT * FROM users) SELECT * FROM cte;")
+        True
+        >>> GroqConfig._is_valid_sql("Here is the query: SELECT * FROM users;")
+        False
+        >>> GroqConfig._is_valid_sql("```sql\\nSELECT * FROM users;\\n```")
+        False
+        >>> GroqConfig._is_valid_sql("SELECT * FROM users; -- This is an explanation")
+        True
+        >>> GroqConfig._is_valid_sql("CREATE TABLE users (id INT, name TEXT);")
+        False
+        >>> GroqConfig._is_valid_sql("")
+        False
+        >>> GroqConfig._is_valid_sql("   ")
+        False
+        >>> GroqConfig._is_valid_sql("EXPLAIN SELECT * FROM users;")
+        False
+        """
+        cleaned = response.strip().upper()
+        sql_starters = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'WITH']
+        return any(cleaned.startswith(keyword) for keyword in sql_starters)
+    
     def _clean_sql(self, sql: str) -> str:
         """Clean and standardize SQL query
     
@@ -88,12 +130,16 @@ class GroqConfig:
                 {examples}
 
                 IMPORTANT:
-                1. Return ONLY the SQL query, no explanations or additional text
-                2. Always use ILIKE instead of LIKE for case-insensitive text matching
-                2. Always end queries with a semicolon
-                3. Use simple ORDER BY without ASC (it's the default)
-                4. Ensure exact schema column names are used
-                5. Always specify the table name in the FROM clause"""
+                1. Return ONLY the raw SQL query - no markdown formatting, no explanations
+                2. Do not wrap the query in ```sql``` blocks
+                3. Do not include any text like "Here is the query:"
+                4. Always use ILIKE instead of LIKE for case-insensitive text matching
+                5. Always end queries with a semicolon
+                6. Use simple ORDER BY without ASC (it's the default)
+                7. Ensure exact schema column names are used
+                8. Always specify the table name in the FROM clause
+                9. Never use BETWEEN for date ranges - use >= and < instead
+                10. Use subqueries only if absolutely necessary."""
                 
                 messages = [
                     {"role": "system", "content": system_prompt},
@@ -103,12 +149,19 @@ class GroqConfig:
 
                 completion = self.client.chat.completions.create(
                     messages=messages,
-                    model="mixtral-8x7b-32768",
-                    temperature=0.1,
+                    model="llama-3.1-8b-instant",
+                    temperature=0.05,
                     max_tokens=1000
                 )
 
-                return self._clean_sql(completion.choices[0].message.content.strip())
+                response = completion.choices[0].message.content.strip()
+
+                if not self._is_valid_sql(response):
+                    if attempt < self.max_retries - 1:
+                        continue
+                    raise Exception("LLM response is not a valid SQL query")
+                
+                return self._clean_sql(response)
 
             except InternalServerError as e:
                 last_exception = e

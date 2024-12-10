@@ -1,0 +1,86 @@
+example_queries:
+  - question: "Display the first and last name of each actor in a single column in upper case letters. Name the column Actor Name, and sort the results alphabetically."
+    sql: "SELECT first_name ||' '|| last_name as \"Actor Name\" FROM actor ORDER BY \"Actor Name\";"
+    
+  - question: "Count the total number of G rated films."
+    sql: "SELECT COUNT(*) FROM film WHERE rating = 'G';"
+
+  - question: "Use a JOIN to list each film and the number of actors who are listed for that film. Use tables film and film_actor."
+    sql: |
+      SELECT f.title, f.film_id, COUNT(fa.actor_id) AS actor_count
+      FROM film f
+      INNER JOIN film_actor fa USING(film_id)
+      GROUP BY f.film_id
+      ORDER BY actor_count, f.title;    
+
+  - question: "Use a JOIN to count the number of English language films in each category. Use table category, film_category, film, and language."
+    sql: |
+      SELECT c.name, COUNT(c.category_id) AS sum
+      FROM category c
+      JOIN film_category fc USING(category_id)
+      JOIN film f USING(film_id)
+      JOIN language l USING(language_id)
+      GROUP BY c.category_id, l.name
+      HAVING l.name = 'English';
+
+  - question: "Use a subquery to select the film_id and title columns for all films whose rental_rate is greater than the average. Use the film table and order by title."
+    sql: |
+      SELECT film_id, title
+      FROM film
+      WHERE rental_rate > (
+        SELECT AVG(rental_rate)
+        FROM film
+      )
+      ORDER BY title;
+
+  - question: "Management wants to advertise to actors, and needs a list of all actors who are not also customers. Assume that if an entry in the customer and actor table share a first_name and last_name, then they represent the same person. Then select all actors who are not also customers."
+    sql: |
+      SELECT a.last_name, a.first_name
+      FROM actor a
+      WHERE (a.last_name, a.first_name) NOT IN (
+      SELECT c.last_name, c.first_name
+      FROM customer c)
+      ORDER BY a.last_name, a.first_name;
+
+  - question: "Management is planning on purchasing new inventory. Films with special features cost more to purchase than films without special features, and so management wants to know if the addition of special features impacts revenue from movies. Write a query that for each special_feature, calculates the total profit of all movies rented with that special feature."
+    sql: |
+      SELECT sp.special_feature, SUM(sp.profit) AS profit
+      FROM (
+      SELECT f.title, unnest(f.special_features) AS special_feature, SUM(p.amount) AS profit
+      FROM film f
+      JOIN inventory i USING(film_id)
+      JOIN rental r USING(inventory_id)
+      JOIN payment p USING (rental_id)
+      GROUP BY f.title, f.special_features) as sp
+      GROUP BY sp.special_feature
+      ORDER BY sp.special_feature;
+
+  - question: "Compute the total revenue for each film."
+    sql: | 
+      SELECT f.title, COALESCE(SUM(p.amount), 0.00) AS revenue
+      FROM film f
+      LEFT JOIN inventory i ON f.film_id = i.film_id
+      LEFT JOIN rental r ON i.inventory_id = r.inventory_id
+      LEFT JOIN payment p ON r.rental_id = p.rental_id
+      GROUP BY f.title
+      ORDER BY revenue DESC;
+
+  - question: "Compute the number of customers who live outside of the US."
+    sql: |
+      SELECT COUNT(c.customer_id) AS count
+      FROM customer c
+      JOIN address a USING(address_id)
+      JOIN city ci USING(city_id)
+      JOIN country co USING(country_id)
+      WHERE country != 'United States';
+
+  - question: "Select the title of all 'G' rated movies that have the 'Trailers' special feature. Order the results alphabetically."
+    sql: |
+      SELECT f.title 
+      FROM film f
+      JOIN (
+      SELECT film_id, unnest(special_features) AS special_features
+      FROM film 
+      ) AS sp ON f.film_id = sp.film_id
+      WHERE f.rating = 'G' AND sp.special_features = 'Trailers'
+      ORDER BY title;

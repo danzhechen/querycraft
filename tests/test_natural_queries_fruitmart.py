@@ -3,7 +3,7 @@ from src.utils.db_connector import DatabaseConnector
 
 @pytest.fixture
 def db():
-    return DatabaseConnector("fruitmart")
+    return DatabaseConnector(schema_name="fruitmart")
 
 def test_natural_language_queries(db):
     """Test natural language queries return correct database results"""

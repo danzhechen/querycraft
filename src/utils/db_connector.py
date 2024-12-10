@@ -8,16 +8,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class DatabaseConnector:
-    def __init__(self, schema_name: str = "fruitmart"):
+    def __init__(self, schema_name: str):
         """Initialize database connector
         
         Args:
             schema_name (str): Name of the schema/database directory
+        Raises:
+            ValueError: If schema_name is not provided
         """
+        if not schema_name:
+            raise ValueError("schema_name must be provided")
         self.project_root = Path(os.getcwd())
         self.db_path = self.project_root / "test_databases" / schema_name
+        self.schema_name = schema_name
         self.groq_config = GroqConfig(schema_name=schema_name)
         logger.info(f"Database path: {self.db_path}")
+        logger.info(f"Using schema: {schema_name}")
 
     def execute_sql(self, sql_query: str) -> str:
         """Execute a SQL query using docker-compose and psql
