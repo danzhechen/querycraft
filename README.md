@@ -21,5 +21,14 @@ The tests in this project evaluate querycraft's ability to generate accurate SQL
 - **Fruitmart Tests**:
   - Examine basic SQL operations such as `COUNT`, handling `NULL` values, and `GROUP BY`.
   - Test slightly more advanced queries involving case-insensitive matching using `ILIKE`.
+  - These tests are located in the `tests` directory and can be executed using the following commands:
+  ```
+  pytest tests/test_syntax.py
+  pytest tests/test_sql_generation_fruitmart.py
+  pytest tests/test_natural_queries_fruitmart.py
+  ```
+  querycraft successfully passes all these tests.
 
-Further tests for **pagila** database operations and advanced SQL functionalities will be included in future iterations.
+- **Pagila Tests**:
+  - The pagila tests are set up differently from fruitmart and focus on more complex SQL scenarios. The tests are based on three additional directories in the `test_databases folder`: `pagila-hw`, `pagila-hw2`, and `pagila-hw3`. These directories are derived from SQL homework assignments for a Big Data class, designed for undergraduate-level complexity.
+  - A `run_tests.sh script` is provided in each directory to streamline the testing process. After setting up Docker for PostgreSQL, you can run the script to execute the tests automatically.
