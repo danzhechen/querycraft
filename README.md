@@ -35,7 +35,7 @@ querycraft successfully passes all these tests.
 
 #### pagila-hw
 - Covers basic SQL queries using the complex pagila schema.
-- querycraft achieved a score of 16/17 on these tests, performing well for undergraduate-level tasks.
+- querycraft achieved a score of **16/17** on these tests, performing well for undergraduate-level tasks.
 
 #### pagila-hw2
 - Includes more advanced SQL concepts such as:
@@ -47,9 +47,8 @@ querycraft successfully passes all these tests.
 
 #### pagila-hw3
 - Focuses on highly complex SQL tasks, including:
-  - Nested subqueries
+  - More Nested subqueries
   - Advanced array manipulations
   - Detailed SQL knowledge
 - querycraft achieved **1 pass** on this test, reflecting the challenging nature of these scenarios and areas for potential enhancement.
-
 
