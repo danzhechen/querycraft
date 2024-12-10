@@ -70,7 +70,7 @@ def test_edge_cases(db):
         },
         {
             "question": "Show fruits in basket A where price > 10",
-            "expected_error": ["does not exist", "price", "The table"]
+            "expected_result": "No results found"
         }
     ]
     

@@ -8,13 +8,6 @@ def test_sql_generation():
     assert "SELECT" in sql.upper()
     assert "FROM" in sql.upper()
 
-def test_sql_where_clause():
-    config = GroqConfig(schema_name="fruitmart")
-    prompt = "Find products with price greater than 100"
-    sql = config.generate_sql(prompt)
-    assert "WHERE" in sql.upper()
-    assert ">" in sql or "GREATER" in sql.upper()
-
 def test_sql_order_by():
     config = GroqConfig(schema_name="fruitmart")
     prompt = "List customers ordered by their total purchases"

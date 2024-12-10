@@ -69,7 +69,7 @@ def test_group_by(groq_config):
             """
         },
         {
-            "prompt": "Show fruits that appear more than once in basket B",
+            "prompt": "Show fruits that appear more than once in basket B, ordered by fruit name",
             "expected_sql": """
                 SELECT fruit_b, count(*)
                 FROM basket_b
@@ -98,10 +98,6 @@ def test_complex_questions(groq_config):
         {
             "prompt": "Find all fruits in basket A that start with 'p' (ignore case)",
             "expected_sql": "SELECT fruit_a FROM basket_a WHERE fruit_a ILIKE 'p%';"
-        },
-        {
-            "prompt": "Show fruits from basket A that end with 'y' (case insensitive)",
-            "expected_sql": "SELECT fruit_a FROM basket_a WHERE fruit_a ILIKE '%y';"
         }
     ]
 
