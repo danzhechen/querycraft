@@ -13,6 +13,15 @@ querycraft is an experiment in leveraging the RAG (Retrieval-Augmented Generatio
 git submodule init
 git submodule update
 ```
+## Interactive Mode
+
+To run querycraft in interactive mode, use the following command:
+
+```
+python -c "from src.utils.db_connector import DatabaseConnector; db = DatabaseConnector('pagila-hw'); db.interactive_mode()"
+```
+- You can modify the database parameter to use fruitmart, or pagila-hw based on your requirements.
+- In this mode, you can ask any natural language questions, and querycraft will generate the corresponding SQL query and return both the query and the results from the database.
 
 ## Tests
 
