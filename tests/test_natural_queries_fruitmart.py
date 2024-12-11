@@ -1,5 +1,5 @@
 import pytest
-from src.utils.db_connector import DatabaseConnector
+from querycraft.utils.db_connector import DatabaseConnector
 
 @pytest.fixture
 def db():

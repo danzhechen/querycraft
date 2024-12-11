@@ -1,5 +1,5 @@
 import pytest
-from src.config.groq_config import GroqConfig
+from querycraft.config.groq_config import GroqConfig
 
 def test_sql_generation():
     config = GroqConfig(schema_name="fruitmart")

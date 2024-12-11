@@ -1,8 +1,8 @@
 import pytest
 import re
-from src.config.groq_config import GroqConfig
+from querycraft.config.groq_config import GroqConfig
 from groq import InternalServerError
-from src.utils.schema_loader import SchemaLoader
+from querycraft.utils.schema_loader import SchemaLoader
 
 @pytest.fixture
 def groq_config():
